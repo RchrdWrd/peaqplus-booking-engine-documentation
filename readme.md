@@ -1,4 +1,4 @@
-![Peaqplus](images/peaqplus.webp)
+![Peaqplus](images/peaqplus.jpg)
 
 # Booking Engine API Documentation
 
