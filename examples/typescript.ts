@@ -38,7 +38,7 @@ interface ApiErrorResponse {
 type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
 
 // Configuration
-const API_BASE_URL: string = 'https://your-domain.com/api';
+const API_BASE_URL: string = 'https://peaqplus.com/api';
 const API_TOKEN: string = 'YOUR_THIRD_PARTY_TOKEN'; // Replace with your actual token
 
 /**
