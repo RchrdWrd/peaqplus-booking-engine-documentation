@@ -107,14 +107,6 @@ POST /api/booking-engine-search
 }
 ```
 
-**Missing Subhotel ID (400 Bad Request)**
-```json
-{
-  "success": false,
-  "message": "Invalid subhotel_id"
-}
-```
-
 **Server Error (500 Internal Server Error)**
 ```json
 {
@@ -329,14 +321,6 @@ POST /api/booking-engine-search
     "date_from": ["The date from field is required."],
     "date_to": ["The date to must be a date after or equal to date from."]
   }
-}
-```
-
-**Hiányzó Subhotel ID (400 Bad Request)**
-```json
-{
-  "success": false,
-  "message": "Invalid subhotel_id"
 }
 ```
 
