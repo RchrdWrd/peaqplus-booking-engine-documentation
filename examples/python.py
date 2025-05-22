@@ -11,7 +11,7 @@ from datetime import datetime
 from typing import Dict, Any, Optional, List
 
 # Configuration
-API_BASE_URL = "https://your-domain.com/api"
+API_BASE_URL = "https://peaqplus.com/api"
 API_TOKEN = "YOUR_THIRD_PARTY_TOKEN"  # Replace with your actual token
 
 class BookingEngineAPI:
