@@ -14,9 +14,16 @@
 ### Overview
 The Booking Engine API provides endpoints for recording search activities in hotel booking systems. This API helps track user search behavior for analytics and reporting purposes.
 
-### Base URL
+### Base URLs
+
+**Production Environment:**
 ```
-https://peaqplus.com/api
+https://app.peaqplus.com/api/v1
+```
+
+**Development Environment:**
+```
+https://beta.peaqplus.com/api/v1
 ```
 
 ### Authentication
@@ -31,21 +38,34 @@ The middleware validates the token and automatically extracts subhotel_id and th
 
 ### POST /booking-engine-search
 
-Records search activities in the booking engine system for analytics and tracking purposes.
+Records search activities in the booking engine system for analytics and tracking purposes. This endpoint accepts both single search objects and arrays of multiple search objects for bulk processing.
 
 #### Endpoint
 ```
-POST /api/booking-engine-search
+POST /api/v1/booking-engine-search
 ```
 
 #### Request Parameters
+
+The endpoint can accept either a **single search object** or an **array of search objects**.
+
+##### Single Search Object
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `date_from` | string | Yes | Check-in date in YYYY-MM-DD format |
 | `date_to` | string | Yes | Check-out date in YYYY-MM-DD format (must be after or equal to date_from) |
 
-#### Request Example
+##### Array of Search Objects
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `[].date_from` | string | Yes | Check-in date in YYYY-MM-DD format |
+| `[].date_to` | string | Yes | Check-out date in YYYY-MM-DD format (must be after or equal to date_from) |
+
+#### Request Examples
+
+##### Single Search Object
 ```json
 {
   "date_from": "2025-06-01",
@@ -53,18 +73,72 @@ POST /api/booking-engine-search
 }
 ```
 
+##### Multiple Search Objects (Array)
+```json
+[
+  {
+    "date_from": "2025-06-01",
+    "date_to": "2025-06-05"
+  },
+  {
+    "date_from": "2025-07-15",
+    "date_to": "2025-07-20"
+  },
+  {
+    "date_from": "2025-08-10",
+    "date_to": "2025-08-12"
+  }
+]
+```
+
 #### Response Format
 
 ##### Success Response (200 OK)
+
+**Single Search Object Response:**
 ```json
 {
   "success": true,
-  "message": "Booking engine search recorded successfully",
+  "message": "Booking engine searches recorded successfully",
   "data": {
-    "days_recorded": 4,
+    "total_days_recorded": 4,
     "subhotel_id": 123,
-    "date_from": "2025-06-01",
-    "date_to": "2025-06-05"
+    "processed_ranges": [
+      {
+        "days_recorded": 4,
+        "date_from": "2025-06-01",
+        "date_to": "2025-06-05"
+      }
+    ]
+  }
+}
+```
+
+**Multiple Search Objects Response:**
+```json
+{
+  "success": true,
+  "message": "Booking engine searches recorded successfully",
+  "data": {
+    "total_days_recorded": 11,
+    "subhotel_id": 123,
+    "processed_ranges": [
+      {
+        "days_recorded": 4,
+        "date_from": "2025-06-01",
+        "date_to": "2025-06-05"
+      },
+      {
+        "days_recorded": 5,
+        "date_from": "2025-07-15",
+        "date_to": "2025-07-20"
+      },
+      {
+        "days_recorded": 2,
+        "date_from": "2025-08-10",
+        "date_to": "2025-08-12"
+      }
+    ]
   }
 }
 ```
@@ -95,7 +169,7 @@ POST /api/booking-engine-search
 }
 ```
 
-**Validation Error (422 Unprocessable Entity)**
+**Validation Error - Single Object (422 Unprocessable Entity)**
 ```json
 {
   "success": false,
@@ -107,11 +181,23 @@ POST /api/booking-engine-search
 }
 ```
 
+**Validation Error - Array (422 Unprocessable Entity)**
+```json
+{
+  "success": false,
+  "message": "The given data was invalid.",
+  "errors": {
+    "0.date_from": ["The 0.date from field is required."],
+    "1.date_to": ["The 1.date to must be a date after or equal to 1.date from."]
+  }
+}
+```
+
 **Server Error (500 Internal Server Error)**
 ```json
 {
   "success": false,
-  "message": "Error processing booking engine search",
+  "message": "Error processing booking engine searches",
   "error": "Database connection failed"
 }
 ```
@@ -120,21 +206,34 @@ POST /api/booking-engine-search
 
 ### POST /test/booking-engine-search
 
-Test endpoint that mimics the search recording functionality without saving data to the database. Used for testing and development purposes.
+Test endpoint that mimics the search recording functionality without saving data to the database. Used for testing and development purposes. This endpoint also accepts both single search objects and arrays of multiple search objects.
 
 #### Endpoint
 ```
-POST /api/test/booking-engine-search
+POST /api/v1/test/booking-engine-search
 ```
 
 #### Request Parameters
+
+The endpoint can accept either a **single search object** or an **array of search objects**.
+
+##### Single Search Object
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `date_from` | string | Yes | Check-in date in YYYY-MM-DD format |
 | `date_to` | string | Yes | Check-out date in YYYY-MM-DD format (must be after or equal to date_from) |
 
-#### Request Example
+##### Array of Search Objects
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `[].date_from` | string | Yes | Check-in date in YYYY-MM-DD format |
+| `[].date_to` | string | Yes | Check-out date in YYYY-MM-DD format (must be after or equal to date_from) |
+
+#### Request Examples
+
+##### Single Search Object
 ```json
 {
   "date_from": "2025-06-01",
@@ -142,18 +241,39 @@ POST /api/test/booking-engine-search
 }
 ```
 
+##### Multiple Search Objects (Array)
+```json
+[
+  {
+    "date_from": "2025-06-01",
+    "date_to": "2025-06-05"
+  },
+  {
+    "date_from": "2025-07-15",
+    "date_to": "2025-07-20"
+  }
+]
+```
+
 #### Response Format
 
 ##### Success Response (200 OK)
+
+**Single Search Object Response:**
 ```json
 {
   "success": true,
   "message": "Booking engine search test completed successfully (no data saved)",
   "data": {
-    "days_recorded": 4,
+    "total_days_recorded": 4,
     "subhotel_id": 123,
-    "date_from": "2025-06-01",
-    "date_to": "2025-06-05",
+    "processed_ranges": [
+      {
+        "days_recorded": 4,
+        "date_from": "2025-06-01",
+        "date_to": "2025-06-05"
+      }
+    ],
     "test_mode": true,
     "would_insert": [
       {
@@ -163,6 +283,88 @@ POST /api/test/booking-engine-search
       },
       {
         "date": "2025-06-02",
+        "subhotel_id": 123,
+        "created_at": "2025-05-22 10:30:45"
+      },
+      {
+        "date": "2025-06-03",
+        "subhotel_id": 123,
+        "created_at": "2025-05-22 10:30:45"
+      },
+      {
+        "date": "2025-06-04",
+        "subhotel_id": 123,
+        "created_at": "2025-05-22 10:30:45"
+      }
+    ]
+  }
+}
+```
+
+**Multiple Search Objects Response:**
+```json
+{
+  "success": true,
+  "message": "Booking engine search test completed successfully (no data saved)",
+  "data": {
+    "total_days_recorded": 9,
+    "subhotel_id": 123,
+    "processed_ranges": [
+      {
+        "days_recorded": 4,
+        "date_from": "2025-06-01",
+        "date_to": "2025-06-05"
+      },
+      {
+        "days_recorded": 5,
+        "date_from": "2025-07-15",
+        "date_to": "2025-07-20"
+      }
+    ],
+    "test_mode": true,
+    "would_insert": [
+      {
+        "date": "2025-06-01",
+        "subhotel_id": 123,
+        "created_at": "2025-05-22 10:30:45"
+      },
+      {
+        "date": "2025-06-02",
+        "subhotel_id": 123,
+        "created_at": "2025-05-22 10:30:45"
+      },
+      {
+        "date": "2025-06-03",
+        "subhotel_id": 123,
+        "created_at": "2025-05-22 10:30:45"
+      },
+      {
+        "date": "2025-06-04",
+        "subhotel_id": 123,
+        "created_at": "2025-05-22 10:30:45"
+      },
+      {
+        "date": "2025-07-15",
+        "subhotel_id": 123,
+        "created_at": "2025-05-22 10:30:45"
+      },
+      {
+        "date": "2025-07-16",
+        "subhotel_id": 123,
+        "created_at": "2025-05-22 10:30:45"
+      },
+      {
+        "date": "2025-07-17",
+        "subhotel_id": 123,
+        "created_at": "2025-05-22 10:30:45"
+      },
+      {
+        "date": "2025-07-18",
+        "subhotel_id": 123,
+        "created_at": "2025-05-22 10:30:45"
+      },
+      {
+        "date": "2025-07-19",
         "subhotel_id": 123,
         "created_at": "2025-05-22 10:30:45"
       }
@@ -202,16 +404,18 @@ Always implement proper error handling to manage different response scenarios:
 - URL validation may be enforced depending on third-party configuration
 - Ensure requests are made from registered domains if URL validation is enabled
 - Sensitive data in request bodies (passwords, tokens) are automatically masked in logs
+- **Bulk Processing**: Use array format for recording multiple searches in a single request to improve performance
 
 ### Rate Limiting
 - Maximum 100 requests per minute per IP address
-- Bulk operations are recommended for multiple searches
+- Bulk operations (array format) are recommended for multiple searches to reduce API calls
 
 ### Best Practices
 1. **Date Validation**: Always validate dates on the client side before sending requests
 2. **Error Handling**: Implement comprehensive error handling for all possible scenarios
 3. **Logging**: Log successful searches for your own analytics
 4. **Retry Logic**: Implement exponential backoff for failed requests
+5. **Bulk Processing**: Use array format when recording multiple searches to minimize API calls and improve performance
 
 ### Additional Information
 
@@ -222,6 +426,7 @@ For technical support, please contact: hello@peaqplus.com
 Current version: v1
 
 #### Changelog
+- v1.1.0: Added support for bulk processing (array of search objects)
 - v1.0.0: Initial release
 
 ---
@@ -231,9 +436,16 @@ Current version: v1
 ### Áttekintés
 A Szállás Foglalási Motor API végpontokat biztosít a keresési tevékenységek rögzítéséhez szállodai foglalási rendszerekben. Ez az API segít nyomon követni a felhasználói keresési viselkedést elemzési és jelentéskészítési célokból.
 
-### URL
+### URL-ek
+
+**Produkciós Környezet:**
 ```
-https://peaqplus.com/api
+https://app.peaqplus.com/api/v1
+```
+
+**Fejlesztői Környezet:**
+```
+https://beta.peaqplus.com/api/v1
 ```
 
 ### Hitelesítés
@@ -248,21 +460,34 @@ A middleware validálja a tokent és automatikusan kinyeri a subhotel_id és har
 
 ### POST /booking-engine-search
 
-Rögzíti a keresési tevékenységeket a foglalási motor rendszerében elemzési és nyomon követési célokból.
+Rögzíti a keresési tevékenységeket a foglalási motor rendszerében elemzési és nyomon követési célokból. Ez a végpont képes kezelni mind egyedi keresési objektumokat, mind több keresési objektum tömbjét tömeges feldolgozáshoz.
 
 #### Végpont
 ```
-POST /api/booking-engine-search
+POST /api/v1/booking-engine-search
 ```
 
 #### Kérés Paraméterei
+
+A végpont képes fogadni mind **egyedi keresési objektumot**, mind **keresési objektumok tömbjét**.
+
+##### Egyedi Keresési Objektum
 
 | Paraméter | Típus | Kötelező | Leírás |
 |-----------|-------|----------|---------|
 | `date_from` | string | Igen | Bejelentkezés dátuma YYYY-MM-DD formátumban |
 | `date_to` | string | Igen | Kijelentkezés dátuma YYYY-MM-DD formátumban (date_from után vagy azzal egyenlő kell legyen) |
 
-#### Kérés Példa
+##### Keresési Objektumok Tömbje
+
+| Paraméter | Típus | Kötelező | Leírás |
+|-----------|-------|----------|---------|
+| `[].date_from` | string | Igen | Bejelentkezés dátuma YYYY-MM-DD formátumban |
+| `[].date_to` | string | Igen | Kijelentkezés dátuma YYYY-MM-DD formátumban (date_from után vagy azzal egyenlő kell legyen) |
+
+#### Kérés Példák
+
+##### Egyedi Keresési Objektum
 ```json
 {
   "date_from": "2025-06-01",
@@ -270,18 +495,72 @@ POST /api/booking-engine-search
 }
 ```
 
+##### Több Keresési Objektum (Tömb)
+```json
+[
+  {
+    "date_from": "2025-06-01",
+    "date_to": "2025-06-05"
+  },
+  {
+    "date_from": "2025-07-15",
+    "date_to": "2025-07-20"
+  },
+  {
+    "date_from": "2025-08-10",
+    "date_to": "2025-08-12"
+  }
+]
+```
+
 #### Válasz Formátum
 
 ##### Sikeres Válasz (200 OK)
+
+**Egyedi Keresési Objektum Válasz:**
 ```json
 {
   "success": true,
-  "message": "Booking engine search recorded successfully",
+  "message": "Booking engine searches recorded successfully",
   "data": {
-    "days_recorded": 4,
+    "total_days_recorded": 4,
     "subhotel_id": 123,
-    "date_from": "2025-06-01",
-    "date_to": "2025-06-05"
+    "processed_ranges": [
+      {
+        "days_recorded": 4,
+        "date_from": "2025-06-01",
+        "date_to": "2025-06-05"
+      }
+    ]
+  }
+}
+```
+
+**Több Keresési Objektum Válasz:**
+```json
+{
+  "success": true,
+  "message": "Booking engine searches recorded successfully",
+  "data": {
+    "total_days_recorded": 11,
+    "subhotel_id": 123,
+    "processed_ranges": [
+      {
+        "days_recorded": 4,
+        "date_from": "2025-06-01",
+        "date_to": "2025-06-05"
+      },
+      {
+        "days_recorded": 5,
+        "date_from": "2025-07-15",
+        "date_to": "2025-07-20"
+      },
+      {
+        "days_recorded": 2,
+        "date_from": "2025-08-10",
+        "date_to": "2025-08-12"
+      }
+    ]
   }
 }
 ```
@@ -312,7 +591,7 @@ POST /api/booking-engine-search
 }
 ```
 
-**Validációs Hiba (422 Unprocessable Entity)**
+**Validációs Hiba - Egyedi Objektum (422 Unprocessable Entity)**
 ```json
 {
   "success": false,
@@ -324,11 +603,23 @@ POST /api/booking-engine-search
 }
 ```
 
+**Validációs Hiba - Tömb (422 Unprocessable Entity)**
+```json
+{
+  "success": false,
+  "message": "The given data was invalid.",
+  "errors": {
+    "0.date_from": ["The 0.date from field is required."],
+    "1.date_to": ["The 1.date to must be a date after or equal to 1.date from."]
+  }
+}
+```
+
 **Szerver Hiba (500 Internal Server Error)**
 ```json
 {
   "success": false,
-  "message": "Error processing booking engine search",
+  "message": "Error processing booking engine searches",
   "error": "Database connection failed"
 }
 ```
@@ -337,21 +628,34 @@ POST /api/booking-engine-search
 
 ### POST /test/booking-engine-search
 
-Teszt végpont, amely utánozza a keresés rögzítési funkcionalitást anélkül, hogy adatokat mentene az adatbázisba. Tesztelési és fejlesztési célokra használatos.
+Teszt végpont, amely utánozza a keresés rögzítési funkcionalitást anélkül, hogy adatokat mentene az adatbázisba. Tesztelési és fejlesztési célokra használatos. Ez a végpont szintén képes kezelni mind egyedi keresési objektumokat, mind több keresési objektum tömbjét.
 
 #### Végpont
 ```
-POST /api/test/booking-engine-search
+POST /api/v1/test/booking-engine-search
 ```
 
 #### Kérés Paraméterei
+
+A végpont képes fogadni mind **egyedi keresési objektumot**, mind **keresési objektumok tömbjét**.
+
+##### Egyedi Keresési Objektum
 
 | Paraméter | Típus | Kötelező | Leírás |
 |-----------|-------|----------|---------|
 | `date_from` | string | Igen | Bejelentkezés dátuma YYYY-MM-DD formátumban |
 | `date_to` | string | Igen | Kijelentkezés dátuma YYYY-MM-DD formátumban (date_from után vagy azzal egyenlő kell legyen) |
 
-#### Kérés Példa
+##### Keresési Objektumok Tömbje
+
+| Paraméter | Típus | Kötelező | Leírás |
+|-----------|-------|----------|---------|
+| `[].date_from` | string | Igen | Bejelentkezés dátuma YYYY-MM-DD formátumban |
+| `[].date_to` | string | Igen | Kijelentkezés dátuma YYYY-MM-DD formátumban (date_from után vagy azzal egyenlő kell legyen) |
+
+#### Kérés Példák
+
+##### Egyedi Keresési Objektum
 ```json
 {
   "date_from": "2025-06-01",
@@ -359,18 +663,39 @@ POST /api/test/booking-engine-search
 }
 ```
 
+##### Több Keresési Objektum (Tömb)
+```json
+[
+  {
+    "date_from": "2025-06-01",
+    "date_to": "2025-06-05"
+  },
+  {
+    "date_from": "2025-07-15",
+    "date_to": "2025-07-20"
+  }
+]
+```
+
 #### Válasz Formátum
 
 ##### Sikeres Válasz (200 OK)
+
+**Egyedi Keresési Objektum Válasz:**
 ```json
 {
   "success": true,
   "message": "Booking engine search test completed successfully (no data saved)",
   "data": {
-    "days_recorded": 4,
+    "total_days_recorded": 4,
     "subhotel_id": 123,
-    "date_from": "2025-06-01",
-    "date_to": "2025-06-05",
+    "processed_ranges": [
+      {
+        "days_recorded": 4,
+        "date_from": "2025-06-01",
+        "date_to": "2025-06-05"
+      }
+    ],
     "test_mode": true,
     "would_insert": [
       {
@@ -380,6 +705,88 @@ POST /api/test/booking-engine-search
       },
       {
         "date": "2025-06-02",
+        "subhotel_id": 123,
+        "created_at": "2025-05-22 10:30:45"
+      },
+      {
+        "date": "2025-06-03",
+        "subhotel_id": 123,
+        "created_at": "2025-05-22 10:30:45"
+      },
+      {
+        "date": "2025-06-04",
+        "subhotel_id": 123,
+        "created_at": "2025-05-22 10:30:45"
+      }
+    ]
+  }
+}
+```
+
+**Több Keresési Objektum Válasz:**
+```json
+{
+  "success": true,
+  "message": "Booking engine search test completed successfully (no data saved)",
+  "data": {
+    "total_days_recorded": 9,
+    "subhotel_id": 123,
+    "processed_ranges": [
+      {
+        "days_recorded": 4,
+        "date_from": "2025-06-01",
+        "date_to": "2025-06-05"
+      },
+      {
+        "days_recorded": 5,
+        "date_from": "2025-07-15",
+        "date_to": "2025-07-20"
+      }
+    ],
+    "test_mode": true,
+    "would_insert": [
+      {
+        "date": "2025-06-01",
+        "subhotel_id": 123,
+        "created_at": "2025-05-22 10:30:45"
+      },
+      {
+        "date": "2025-06-02",
+        "subhotel_id": 123,
+        "created_at": "2025-05-22 10:30:45"
+      },
+      {
+        "date": "2025-06-03",
+        "subhotel_id": 123,
+        "created_at": "2025-05-22 10:30:45"
+      },
+      {
+        "date": "2025-06-04",
+        "subhotel_id": 123,
+        "created_at": "2025-05-22 10:30:45"
+      },
+      {
+        "date": "2025-07-15",
+        "subhotel_id": 123,
+        "created_at": "2025-05-22 10:30:45"
+      },
+      {
+        "date": "2025-07-16",
+        "subhotel_id": 123,
+        "created_at": "2025-05-22 10:30:45"
+      },
+      {
+        "date": "2025-07-17",
+        "subhotel_id": 123,
+        "created_at": "2025-05-22 10:30:45"
+      },
+      {
+        "date": "2025-07-18",
+        "subhotel_id": 123,
+        "created_at": "2025-05-22 10:30:45"
+      },
+      {
+        "date": "2025-07-19",
         "subhotel_id": 123,
         "created_at": "2025-05-22 10:30:45"
       }
@@ -419,16 +826,18 @@ Mindig implementáljon megfelelő hibakezelést a különböző válasz forgató
 - URL validáció a harmadik fél konfigurációjától függően lehet kötelező
 - Győződjön meg róla, hogy a kérések regisztrált domain-ekről érkeznek, ha az URL validáció engedélyezve van
 - A kérés törzsében lévő érzékeny adatok (jelszavak, tokenek) automatikusan maszkolt formában kerülnek naplózásra
+- **Tömeges Feldolgozás**: Több keresés rögzítéséhez használja a tömb formátumot egyetlen kérésben a teljesítmény javítása érdekében
 
 ### Sebesség Korlátozás
 - Maximum 100 kérés percenként IP címenként
-- Tömeges műveletek ajánlottak több kereséshez
+- Tömeges műveletek (tömb formátum) ajánlottak több kereséshez az API hívások csökkentése érdekében
 
 ### Legjobb Gyakorlatok
 1. **Dátum Validáció**: Mindig validálja a dátumokat a kliens oldalon a kérések elküldése előtt
 2. **Hibakezelés**: Átfogó hibakezelést implementáljon minden lehetséges forgatókönyvhöz
 3. **Naplózás**: Naplózza a sikeres kereséseket saját elemzési célokra
 4. **Újrapróbálkozási Logika**: Exponenciális visszatartást implementáljon sikertelen kérésekhez
+5. **Tömeges Feldolgozás**: Több keresés rögzítésekor használja a tömb formátumot az API hívások minimalizálása és a teljesítmény javítása érdekében
 
 ### További Információk
 
@@ -439,6 +848,7 @@ Technikai támogatásért forduljon ide: hello@peaqplus.com
 Jelenlegi verzió: v1
 
 #### Változásnapló
+- v1.1.0: Tömeges feldolgozás támogatás hozzáadva (keresési objektumok tömbje)
 - v1.0.0: Első kiadás
 
 ---
